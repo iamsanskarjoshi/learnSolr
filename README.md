@@ -77,10 +77,13 @@ docker compose
         driver: local
 
 '''
-'''
-    docker compose up
+''' docker compose up
 '''
 Create a core 
+'''
+http://localhost:8983/solr/admin/collections?action=CREATE&name=books&collection.configName=books&numShards=1
+
+'''
 #### b. Defining the Schema
 Before you can index data, you need to define the schema. This involves specifying the fields and their types in a configuration file called `schema.xml`.
 Navigate to the my_core directory, which is usually located in server/solr/my_core/conf. Here, you'll find a file named managed-schema. This is where you define your schema.
