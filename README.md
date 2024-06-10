@@ -37,7 +37,8 @@ Solr is designed to handle large volumes of data and high query loads. It can be
 
 ### 4. Basic Workflow
 docker compose
-'''docker-compose
+'''
+    docker-compose
     version: '3'
 
     services:
