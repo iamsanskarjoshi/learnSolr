@@ -36,10 +36,50 @@ Highlighting is a feature that shows the parts of the document that match the se
 Solr is designed to handle large volumes of data and high query loads. It can be distributed across multiple servers to improve performance and reliability.
 
 ### 4. Basic Workflow
+docker compose
+'''docker-compose
+version: '3'
 
-#### a. Setting Up Solr
-To get started with Solr, you need to download and install it. You can run Solr as a standalone server or integrate it into your application.
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
 
+  solr:
+    image: solr:latest
+    restart: always
+    container_name: solr
+    ports:
+      - "8983:8983"
+    environment:
+      - SOLR_CORE=mycore
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - mycore
+    volumes:
+      - solr-data:/var/solr
+
+volumes:
+  mysql-data:
+    driver: local
+  solr-data:
+    driver: local
+
+'''
+docker compose up
+'''
+Create a core 
 #### b. Defining the Schema
 Before you can index data, you need to define the schema. This involves specifying the fields and their types in a configuration file called `schema.xml`.
 Navigate to the my_core directory, which is usually located in server/solr/my_core/conf. Here, you'll find a file named managed-schema. This is where you define your schema.
@@ -55,6 +95,15 @@ Open the managed-schema file in a text editor and define your fields. Here’s a
     <field name="description" type="text_general" indexed="true" stored="true" />
   </fields>
 </schema>
+----
+curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-field": {
+    "name": "title",
+    "type": "text_general",
+    "indexed": true,
+    "stored": true
+  }
+}' http://localhost:8983/solr/mycore/schema
 
 #### c. Indexing Data
 Once the schema is defined, you can start indexing data. This involves sending documents to Solr using its API. Solr will process the documents and add them to the index.
@@ -69,13 +118,10 @@ Here's a simple example of how to index and query data in Solr using its REST AP
 #### a. Indexing a Document
 
 ```bash
-curl -X POST -H 'Content-Type: application/json' 'http://localhost:8983/solr/your_core/update?commit=true' -d '[
+curl -X POST -H 'Content-Type: application/json' 'http://localhost:8983/solr/mycore/update?commit=true' -d '[
   {
     "id": "1",
-    "title": "The Great Gatsby",
-    "author": "F. Scott Fitzgerald",
-    "publication_date": "1925-04-10T00:00:00Z",
-    "description": "A novel set in the Jazz Age."
+    "title": "The Great Gatsby"
   }
 ]'
 ```
@@ -99,3 +145,14 @@ Solr supports various plugins and extensions that add additional functionality, 
 
 ### Conclusion
 Solr is a powerful and flexible search platform that can handle a wide range of search and indexing needs. By understanding its core concepts and features, you can build efficient and scalable search applications. As you become more familiar with Solr, you can explore its advanced features and customization options to tailor it to your specific requirements.
+
+
+### --------
+Questions:
+### Solr and SolrCloud 
+### Architecture
+### Zookeeper
+### Indexing, Searching
+### API's create 
+### indexing 
+### schema's 
