@@ -3,6 +3,7 @@ version: '3'
 services:
   mysql:
     image: mysql:latest
+    restart: always
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -16,6 +17,7 @@ services:
 
   solr:
     image: solr:latest
+    restart: always
     container_name: solr
     ports:
       - "8983:8983"
