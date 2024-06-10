@@ -38,44 +38,45 @@ Solr is designed to handle large volumes of data and high query loads. It can be
 ### 4. Basic Workflow
 docker compose
 '''docker-compose
-version: '3'
+    version: '3'
 
-services:
-  mysql:
-    image: mysql:latest
-    restart: always
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: testuser
-      MYSQL_PASSWORD: testpassword
-    ports:
-      - "3306:3306"
+    services:
+    mysql:
+        image: mysql:latest
+        restart: always
+        container_name: mysql
+        environment:
+        MYSQL_ROOT_PASSWORD: rootpassword
+        MYSQL_DATABASE: testdb
+        MYSQL_USER: testuser
+        MYSQL_PASSWORD: testpassword
+        ports:
+        - "3306:3306"
+        volumes:
+        - mysql-data:/var/lib/mysql
+
+    solr:
+        image: solr:latest
+        restart: always
+        container_name: solr
+        ports:
+        - "8983:8983"
+        environment:
+        - SOLR_CORE=mycore
+        entrypoint:
+        - docker-entrypoint.sh
+        - solr-precreate
+        - mycore
+        volumes:
+        - solr-data:/var/solr
+
     volumes:
-      - mysql-data:/var/lib/mysql
+    mysql-data:
+        driver: local
+    solr-data:
+        driver: local
 
-  solr:
-    image: solr:latest
-    restart: always
-    container_name: solr
-    ports:
-      - "8983:8983"
-    environment:
-      - SOLR_CORE=mycore
-    entrypoint:
-      - docker-entrypoint.sh
-      - solr-precreate
-      - mycore
-    volumes:
-      - solr-data:/var/solr
-
-volumes:
-  mysql-data:
-    driver: local
-  solr-data:
-    driver: local
-
+'''
 '''
 docker compose up
 '''
