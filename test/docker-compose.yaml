@@ -1,0 +1,38 @@
+version: '3'
+services:
+  solr:
+    image: solr:9-slim
+    ports:
+      - "8983:8983"
+    networks: 
+      - search
+    environment:
+      ZK_HOST: "zoo:2181"
+    depends_on: 
+      - zoo
+    restart: on-failure
+    volumes:
+      - solr-data:/var/solr
+
+  zoo:
+    image: zookeeper:3.9
+    networks: 
+      - search
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "mntr,conf,ruok"
+    restart: on-failure
+    volumes:
+      - zoo-data:/data
+      - zoo-datalog:/datalog
+
+networks:
+  search:
+    driver: bridge
+
+volumes:
+  solr-data:
+    driver: local
+  zoo-data:
+    driver: local
+  zoo-datalog:
+    driver: local

@@ -38,50 +38,65 @@ Solr is designed to handle large volumes of data and high query loads. It can be
 ### 4. Basic Workflow
 docker compose
 '''
-    version: '3'
+    
 
-    services:
-    mysql:
-        image: mysql:latest
-        restart: always
-        container_name: mysql
-        environment:
-        MYSQL_ROOT_PASSWORD: rootpassword
-        MYSQL_DATABASE: testdb
-        MYSQL_USER: testuser
-        MYSQL_PASSWORD: testpassword
-        ports:
-        - "3306:3306"
-        volumes:
-        - mysql-data:/var/lib/mysql
-
-    solr:
-        image: solr:latest
-        restart: always
-        container_name: solr
-        ports:
-        - "8983:8983"
-        environment:
-        - SOLR_CORE=mycore
-        entrypoint:
-        - docker-entrypoint.sh
-        - solr-precreate
-        - mycore
-        volumes:
-        - solr-data:/var/solr
-
+'''
+version: '3'
+services:
+  solr:
+    image: solr:9-slim
+    ports:
+      - "8983:8983"
+    networks: 
+      - search
+    environment:
+      ZK_HOST: "zoo:2181"
+    depends_on: 
+      - zoo
+    restart: on-failure
     volumes:
-    mysql-data:
-        driver: local
-    solr-data:
-        driver: local
+      - solr-data:/var/solr
 
+  zoo:
+    image: zookeeper:3.9
+    networks: 
+      - search
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "mntr,conf,ruok"
+    restart: on-failure
+    volumes:
+      - zoo-data:/data
+      - zoo-datalog:/datalog
+
+networks:
+  search:
+    driver: bridge
+
+volumes:
+  solr-data:
+    driver: local
+  zoo-data:
+    driver: local
+  zoo-datalog:
+    driver: local
+
+''' docker compose up -d
 '''
-''' docker compose up
+
+### Upload a Configset
 '''
+curl -X POST --header "Content-Type:application/octet-stream" --data-binary @a.zip "http://localhost:8983/solr/admin/configs?action=UPLOAD&name=myConfigSet"
+'''
+
 Create a core 
-'''
-http://localhost:8983/solr/admin/collections?action=CREATE&name=books&collection.configName=books&numShards=1
+''' Json
+curl -X POST http://localhost:8983/api/collections -H 'Content-Type: application/json' -d '
+  {
+    "name": "books",
+    "config": "books",
+    "numShards": 1
+  }
+'
 
 '''
 #### b. Defining the Schema
